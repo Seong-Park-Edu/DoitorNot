@@ -3,7 +3,7 @@ import Slider from '@react-native-community/slider';
 import * as Haptics from 'expo-haptics';
 import * as Sharing from 'expo-sharing';
 import React, { useEffect, useRef, useState } from 'react';
-import { BackHandler, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { BackHandler, Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 // 방금 만든 컴포넌트 import (경로 확인 필수!)
 import LottieView from 'lottie-react-native';
@@ -62,6 +62,21 @@ export default function HomeScreen() {
 
   const viewShotRef = useRef<any>(null);
   const coinRef = useRef<any>(null); // CoinFlip 제어용 ref
+
+  // [NEW] 하트 폭죽 제어용 Ref 생성
+  const heartRef = useRef<LottieView>(null);
+
+  // [NEW] 고양이 클릭 시 실행될 함수
+  const handleCatPress = () => {
+    // 1. 손맛(햅틱) 추가
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    // 2. [핵심] 묻지도 따지지도 않고 일단 '정지 및 되감기(Reset)'
+    heartRef.current?.reset();
+
+    // 3. 그리고 바로 0프레임부터 다시 재생
+    heartRef.current?.play(0);
+  };
 
   const getSliderColor = () => {
     if (ratio === 50) return '#333333';
@@ -243,7 +258,7 @@ export default function HomeScreen() {
           </View>
 
 
-          <View style={styles.logoContainer}>
+          <Pressable onPress={handleCatPress} style={styles.logoContainer}>
             <LottieView
               // 나중에 'thinking.json' 같은 걸 받아서 assets/images에 넣고 경로를 바꾸세요.
               // 지금은 에러 방지를 위해 coin-flip을 씁니다.
@@ -252,7 +267,18 @@ export default function HomeScreen() {
               loop // 계속 움직이게 함
               style={{ width: 150, height: 150 }} // 크기 조절
             />
-          </View>
+
+
+            {/* 2. [NEW] 클릭하면 터질 하트 폭죽 (평소엔 멈춰있음) */}
+            <LottieView
+              ref={heartRef}
+              source={require('../../assets/images/Bubble-Explosion.json')} // 파일명 확인 필수!
+              loop={false} // 한 번만 펑! 하고 끝나야 함
+              autoPlay={false} // 자동으로 시작 금지
+              style={styles.heartEffect} // 스타일로 위치 겹치기
+              resizeMode="cover"
+            />
+          </Pressable>
 
           <TextInput
             style={[styles.input, { textAlign: 'center' }]}
@@ -369,6 +395,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: 100, // 애니메이션이 들어갈 충분한 높이 확보
+  },
+  // [NEW] 하트 폭죽 스타일
+  heartEffect: {
+    position: 'absolute', // 겹치기 필수
+    width: 300,  // 고양이보다 훨씬 크게! (폭죽이니까)
+    height: 300,
+    zIndex: 10,  // 고양이보다 위에 보이게
+    pointerEvents: 'none', // 하트가 터지는 동안에도 고양이를 또 누를 수 있게 터치 통과
   },
   input: {
     width: '100%',
