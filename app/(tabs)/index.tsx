@@ -7,7 +7,19 @@ import { BackHandler, Keyboard, Pressable, StyleSheet, Text, TextInput, Touchabl
 import ViewShot from 'react-native-view-shot';
 // 방금 만든 컴포넌트 import (경로 확인 필수!)
 import LottieView from 'lottie-react-native';
+import { AdEventType, BannerAd, BannerAdSize, InterstitialAd, TestIds } from 'react-native-google-mobile-ads';
 import CoinFlip from '../../components/CoinFlip';
+
+// 0. 배너 광고 ID 설정 (테스트용 vs 실전용)
+const adUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-3217076747522132/4038060077'
+
+// 1. 전면 광고 ID 설정 (테스트용 vs 실전용)
+const interstitialId = __DEV__ ? TestIds.INTERSTITIAL : 'ca-app-pub-3217076747522132/2702789497';
+
+// 2. 광고 객체 미리 만들기
+const interstitial = InterstitialAd.createForAdRequest(interstitialId, {
+  requestNonPersonalizedAdsOnly: true,
+});
 
 export default function HomeScreen() {
   const [worry, setWorry] = useState('');
@@ -20,6 +32,9 @@ export default function HomeScreen() {
 
   // [NEW] 모드 상태 추가 ('BASIC' 또는 'FUN')
   const [mode, setMode] = useState<'BASIC' | 'FUN'>('BASIC');
+
+  // [NEW] 전면 광고 로딩 상태 관리
+  const [interstitialLoaded, setInterstitialLoaded] = useState(false);
 
   // [NEW] Fun 모드에서 숫자가 증/감 하는 방향 (true: 증가, false: 감소)
   const directionRef = useRef(true);
@@ -65,6 +80,34 @@ export default function HomeScreen() {
 
   // [NEW] 하트 폭죽 제어용 Ref 생성
   const heartRef = useRef<LottieView>(null);
+
+  // [NEW] 전면 광고 라이프사이클 관리
+  useEffect(() => {
+    // 이벤트 리스너: 광고가 로딩되면 '준비됨' 상태로 변경
+    const unsubscribeLoaded = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+      setInterstitialLoaded(true);
+    });
+
+    // 이벤트 리스너: 광고를 닫으면 -> 진짜 리셋 실행 & 다음 광고 미리 로딩
+    const unsubscribeClosed = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+      setInterstitialLoaded(false);
+      realReset(); // 광고 닫은 후에 초기화 실행
+      interstitial.load(); // 다음 번을 위해 미리 로딩 (Pre-load)
+    });
+
+    // 앱 켜지자마자 첫 광고 로딩 시작
+    interstitial.load();
+
+    // 청소(Clean-up)
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeClosed();
+    };
+  }, []);
+
+
+
+
 
   // [NEW] 고양이 클릭 시 실행될 함수
   const handleCatPress = () => {
@@ -144,13 +187,24 @@ export default function HomeScreen() {
     }
   };
 
-  const reset = () => {
+  // [NEW] 실제 초기화 로직 (원래 reset 함수에 있던 내용)
+  const realReset = () => {
     setResult(null);
     setCapturedWorry('');
     setWorry('');
     setRatio(50);
-    // 동전 애니메이션도 초기화
     if (coinRef.current) coinRef.current.reset();
+  };
+
+  // [NEW] 버튼에 연결된 reset 함수 수정
+  const reset = () => {
+    // 광고가 준비되었으면 광고를 보여줌 -> 닫으면 위 이벤트(CLOSED)에서 realReset 실행됨
+    if (interstitialLoaded) {
+      interstitial.show();
+    } else {
+      // 광고가 아직 안 불러와졌으면 그냥 바로 초기화
+      realReset();
+    }
   };
 
   // [NEW] 뒤로가기 버튼 제어 (결과 화면에서만 작동)
@@ -203,11 +257,32 @@ export default function HomeScreen() {
       {/* --- 2. 결과 화면 --- */}
       {!isAnimating && result && (
         <View style={{ width: '100%', alignItems: 'center' }}>
+
+          {/* [NEW] 결과에 따른 애니메이션 추가 */}
+          <View style={styles.resultIconContainer}>
+            {result === 'DO' ? (
+              <LottieView
+                source={require('../../assets/images/Success-celebration.json')} // 파일명 확인!
+                autoPlay
+                loop={true} // 축포는 계속 터지게
+                style={{ width: 300, height: 350 }}
+              />
+            ) : (
+              <LottieView
+                source={require('../../assets/images/Stop-Button.json')} // 파일명 확인!
+                autoPlay
+                loop={true} // X표시는 딱 한번만 뜨게
+                style={{ width: 350, height: 250 }}
+              />
+            )}
+          </View>
+
           {/* 캡처 영역: 고민 + 결과 */}
           <ViewShot ref={viewShotRef} options={{ format: "jpg", quality: 0.9 }} style={styles.captureCard}>
             <View style={styles.divider} />
             <Text style={styles.worryText}>"{capturedWorry}"</Text>
 
+            {/* 결과 텍스트 */}
             {result === 'DO' ? (
               <Text style={[styles.resultBigText, styles.doIt]}>DO IT!</Text>
             ) : (
@@ -235,6 +310,18 @@ export default function HomeScreen() {
               <Text style={styles.actionButtonText}>📤 공유하기</Text>
             </TouchableOpacity>
           </View>
+
+          {/* ▼ 배너 광고 영역 ▼ */}
+          <View style={styles.adContainer}>
+            <BannerAd
+              unitId={adUnitId}
+              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+              requestOptions={{
+                requestNonPersonalizedAdsOnly: true,
+              }}
+            />
+          </View>
+
         </View>
       )}
 
@@ -487,10 +574,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 30,
   },
+  // [NEW] 결과 아이콘(애니메이션) 컨테이너
+  resultIconContainer: {
+    height: 120, // 애니메이션 높이 확보
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   resultBigText: {
     fontSize: 48,
     fontWeight: '900',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   doIt: { color: '#2ecc71' },
   dontDoIt: { color: '#e74c3c' },
@@ -523,5 +617,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
-  }
+  },
+  adContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 20, // 상단 여백
+    paddingBottom: 20, // 하단 여백
+  },
 });

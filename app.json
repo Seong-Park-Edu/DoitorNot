@@ -2,17 +2,18 @@
   "expo": {
     "name": "할래말래",
     "slug": "DoItOrNot",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "doitornot",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jongseong.park.DoItOrNot"
     },
     "android": {
-      "versionCode": 8,
+      "versionCode": 10,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -41,7 +42,14 @@
           }
         }
       ],
-      "expo-mail-composer"
+      "expo-mail-composer",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3217076747522132~3944850878",
+          "iosAppId": "ca-app-pub-3217076747522132~3944850878"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
