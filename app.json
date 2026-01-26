@@ -2,7 +2,7 @@
   "expo": {
     "name": "할래말래",
     "slug": "DoItOrNot",
-    "version": "1.3.3",
+    "version": "1.3.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "doitornot",
@@ -10,13 +10,18 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jongseong.park.DoItOrNot"
+      "bundleIdentifier": "com.jongseong.park.DoItOrNot",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "주변 맛집 정보를 정확히 표시하기 위해 현재 위치 권한이 필요합니다."
+      }
     },
     "android": {
-      "versionCode": 33,
+      "versionCode": 35,
       "permissions": [
         "android.permission.INTERNET",
-        "com.google.android.gms.permission.AD_ID"
+        "com.google.android.gms.permission.AD_ID",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",

@@ -1,15 +1,15 @@
-import * as MailComposer from 'expo-mail-composer';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
+  Alert,
+  Keyboard,
+  Linking,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
 
 export default function FeedbackScreen() {
@@ -18,35 +18,25 @@ export default function FeedbackScreen() {
 
   // 메일 보내기 함수
   const sendEmail = async () => {
-    // 1. 메일 기능 사용 가능한지 체크
-    const isAvailable = await MailComposer.isAvailableAsync();
+    const email = 'pjs930224@gmail.com';
+    const subject = '[할래말래] 사용자 피드백';
+    const body = content;
 
-    if (!isAvailable) {
-      Alert.alert("알림", "이 기기에서는 메일 앱을 실행할 수 없습니다.\n직접 메일을 보내주세요!\n(pjs930224@gmail.com)");
-      return;
-    }
+    // mailto URL 생성 (한글 깨짐 방지를 위해 인코딩 필요)
+    const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-    // 2. 내용이 없으면 경고
-    if (content.trim() === '') {
-      Alert.alert("알림", "내용을 입력해주세요!");
-      return;
-    }
-
-    // 3. 메일 창 띄우기
+    // 열 수 있는지 확인 후 실행
     try {
-      await MailComposer.composeAsync({
-        recipients: ['pjs930224@gmail.com'], // 여기에 개발자님 이메일 입력!
-        subject: '[할래말래] 사용자 피드백', // 메일 제목
-        body: content, // 사용자가 입력한 내용
-      });
-      
-      // 메일 앱 갔다 오면 감사 인사 (정확히는 메일 전송 성공 여부를 완벽히 알 순 없지만 UX상 보여줌)
-      Alert.alert("감사합니다", "소중한 의견이 개발자에게 전달되었습니다! 💌", [
-        { text: "확인", onPress: () => router.back() } // 뒤로 가기
-      ]);
-      
-    } catch (error) {
-      Alert.alert("오류", "메일 앱을 여는 도중 문제가 발생했습니다.");
+      const canOpen = await Linking.canOpenURL(mailtoUrl);
+
+      if (canOpen) {
+        await Linking.openURL(mailtoUrl); // 여기서 사용자의 기본 메일 앱이 열립니다.
+      } else {
+        // 시뮬레이터거나 메일 앱이 아예 없는 경우
+        Alert.alert("알림", "메일 앱을 열 수 없습니다. 직접 메일을 보내주세요!\n(pjs930224@gmail.com)");
+      }
+    } catch (err) {
+      Alert.alert("오류", "메일 앱 실행 중 오류가 발생했습니다.");
     }
   };
 

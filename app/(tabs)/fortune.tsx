@@ -1,17 +1,19 @@
 import { useFocusEffect } from 'expo-router'; // 탭 포커스 감지용
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Platform, StyleSheet, View } from 'react-native';
-import { useRewardedAd } from 'react-native-google-mobile-ads';
+import { TestIds, useRewardedAd } from 'react-native-google-mobile-ads';
 import { WebView } from 'react-native-webview';
 
 // ★ [설정 1] 배포한 웹사이트 주소 (http://... 말고 https://... 권장)
 // 테스트 중이면 본인 PC IP 주소 (예: http://192.168.0.x:5173/fortune)
 // 반드시 뒤에 /fortune 경로까지 적어주세요. 그래야 바로 운세 페이지가 뜹니다.
-const WEBSITE_URL = 'https://mealwiki.com/fortune'; 
+const WEBSITE_URL = 'https://mealwiki.com/fortune';
 
 // ★ [설정 2] 보상형 광고 ID (테스트용 ID 넣어둠. 출시 전 실제 ID로 교체)
-const AD_UNIT_ID = 'ca-app-pub-3217076747522132/8914209122'; // 실전용
-// const AD_UNIT_ID = TestIds.REWARDED; 
+
+const AD_UNIT_ID = __DEV__
+  ? TestIds.REWARDED
+  : 'ca-app-pub-3217076747522132/8914209122';
 
 export default function FortuneScreen() {
   const webViewRef = useRef<WebView>(null);
@@ -68,7 +70,7 @@ export default function FortuneScreen() {
   const handleWebViewMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      
+
       if (data.type === 'SHOW_REWARD_AD') {
         if (isLoaded) {
           show();
@@ -87,6 +89,11 @@ export default function FortuneScreen() {
       <WebView
         ref={webViewRef}
         source={{ uri: WEBSITE_URL }}
+        geolocationEnabled={true}
+        // @ts-ignore
+        onGeolocationRequest={(event: any) => {
+          event.continue(true);
+        }}
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}
@@ -98,7 +105,10 @@ export default function FortuneScreen() {
         startInLoadingState={true}
         renderLoading={() => <ActivityIndicator size="large" color="#FF5722" style={styles.loading} />}
         // UserAgent 설정 (웹에서 앱임을 인식시키고 싶을 때)
-        userAgent="MealWikiApp/1.0"
+        userAgent={Platform.OS === 'android'
+          ? "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36 MealWikiApp/1.0"
+          : "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1 MealWikiApp/1.0"
+        }
       />
     </View>
   );
