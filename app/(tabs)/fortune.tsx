@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router'; // 탭 포커스 감지용
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, BackHandler, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Platform, StyleSheet, View } from 'react-native';
 import { TestIds, useRewardedAd } from 'react-native-google-mobile-ads';
 import { WebView } from 'react-native-webview';
 
@@ -75,8 +75,8 @@ export default function FortuneScreen() {
         if (isLoaded) {
           show();
         } else {
-          Alert.alert("알림", "광고를 불러오는 중입니다. 잠시만 기다려주세요.");
-          load(); // 혹시 로드 안 됐으면 재시도
+          // Alert.alert("알림", "광고를 불러오는 중입니다. 잠시만 기다려주세요.");
+          
         }
       }
     } catch (error) {

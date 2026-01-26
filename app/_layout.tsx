@@ -18,21 +18,20 @@ export default function RootLayout() {
 
   useEffect(() => {
     (async () => {
-      // [하드웨어] 앱 차원에서 OS에게 위치 권한을 승인받습니다.
+      // 1. [하드웨어] 위치 권한 요청
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         alert('위치 권한을 허용해야 주변 맛집을 볼 수 있어요!');
       }
-    })();
-  }, []);
 
-  useEffect(() => {
-    // 앱 시작 시 광고 SDK 초기화
-    mobileAds()
-      .initialize()
-      .then(adapterStatuses => {
-        console.log('광고 SDK 초기화 완료!', adapterStatuses);
-      });
+      // 2. [소프트웨어] 광고 SDK 초기화
+      // await를 써서 순차적으로 해도 되고, 지금처럼 비동기로 둬도 됩니다.
+      mobileAds()
+        .initialize()
+        .then(adapterStatuses => {
+          console.log('광고 SDK 초기화 완료!', adapterStatuses);
+        });
+    })();
   }, []);
 
   return (
