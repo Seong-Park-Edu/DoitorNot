@@ -1,3 +1,4 @@
+// PJS93의 강제 업데이트 테스트
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Slider from '@react-native-community/slider';
 import * as Haptics from 'expo-haptics';

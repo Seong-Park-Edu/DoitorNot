@@ -53,6 +53,17 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="history" color={color} />,
         }}
       />
+
+      {/* ★ 3. [추가] 운세/맛집 (MealWiki) */}
+      <Tabs.Screen
+        name="fortune"  // 파일명과 일치해야 함 (fortune.tsx)
+        options={{
+          title: 'MealWiki',
+          headerShown: true, // 웹사이트 자체 헤더를 쓸 거면 앱 헤더는 숨김
+          tabBarIcon: ({ color }) => <TabBarIcon name="cutlery" color={color} />, // 숟가락 포크 아이콘 (FontAwesome)
+        }}
+      />
+
     </Tabs>
   );
 }

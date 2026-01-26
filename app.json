@@ -2,7 +2,7 @@
   "expo": {
     "name": "할래말래",
     "slug": "DoItOrNot",
-    "version": "1.1.2",
+    "version": "1.3.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "doitornot",
@@ -13,7 +13,11 @@
       "bundleIdentifier": "com.jongseong.park.DoItOrNot"
     },
     "android": {
-      "versionCode": 10,
+      "versionCode": 33,
+      "permissions": [
+        "android.permission.INTERNET",
+        "com.google.android.gms.permission.AD_ID"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -61,5 +65,9 @@
         "projectId": "36895603-6a67-44fc-a9e1-fd3f9b737b0a"
       }
     }
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-3217076747522132~3944850878",
+    "ios_app_id": "ca-app-pub-3217076747522132~3944850878"
   }
 }
