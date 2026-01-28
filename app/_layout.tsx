@@ -9,8 +9,8 @@ import mobileAds from 'react-native-google-mobile-ads';
 // 1. 알림 핸들러 설정 (앱이 켜져 있을 때 처리)
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
+    shouldShowAlert: false,
+    shouldPlaySound: false,
     shouldSetBadge: false,
   } as Notifications.NotificationBehavior),
 });
